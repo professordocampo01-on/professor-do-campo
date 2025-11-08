@@ -1,3 +1,4 @@
+// mobile/src/screens/LoginScreen.jsx
 import React, { useState } from 'react';
 import {
   View,
@@ -6,6 +7,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '../api';
 import { colors } from '../theme/colors';
 
@@ -23,13 +25,28 @@ export default function LoginScreen({ navigation }) {
       const token = res.data?.access_token;
 
       if (token) {
-        console.log('Token recebido:', token);
-        navigation.navigate('Home');
+        // ✅ Salva token JWT localmente
+        await AsyncStorage.setItem('token', token);
+
+        // ✅ Seta header padrão no axios
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+        console.log('Token salvo com sucesso:', token);
+
+        // ✅ Redireciona para Home e limpa histórico
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Home' }],
+        });
       } else {
-        setError('Falha ao autenticar.');
+        setError('Falha ao autenticar: token não recebido.');
       }
     } catch (err) {
-      setError('Email ou senha inválidos.');
+      const msg =
+        err?.response?.data?.detail ||
+        err?.response?.data?.message ||
+        'Email ou senha inválidos.';
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -80,6 +97,7 @@ export default function LoginScreen({ navigation }) {
           marginTop: 20,
           alignItems: 'center',
         }}
+        disabled={loading}
       >
         {loading ? (
           <ActivityIndicator color="black" />
