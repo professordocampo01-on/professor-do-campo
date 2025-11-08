@@ -1,3 +1,4 @@
+// mobile/src/screens/RegisterScreen.jsx
 import React, { useState } from 'react';
 import {
   View,
@@ -30,19 +31,25 @@ export default function RegisterScreen({ navigation }) {
 
       if (res.status === 200 || res.status === 201) {
         setSuccess(true);
-        setTimeout(() => navigation.navigate('Login'), 1500);
+        // após registrar, voltar para login
+        setTimeout(() => navigation.navigate('Login'), 1200);
       } else {
         setError('Falha ao criar conta.');
       }
     } catch (err) {
-      setError('Erro ao registrar. Verifique os dados.');
+      // tenta extrair mensagem do backend (se houver)
+      const msg =
+        err?.response?.data?.detail ||
+        err?.response?.data?.message ||
+        'Erro ao registrar. Verifique os dados.';
+      setError(msg);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#000', justifyContent: 'center', padding: 24 }}>
+    <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: 'center', padding: 24 }}>
       <Text style={{ color: colors.gold, fontSize: 26, fontWeight: 'bold', textAlign: 'center' }}>
         Criar Conta
       </Text>
@@ -60,11 +67,14 @@ export default function RegisterScreen({ navigation }) {
           borderRadius: 8,
         }}
       />
+
       <TextInput
         placeholder="Email"
         placeholderTextColor="#aaa"
         value={email}
         onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
         style={{
           backgroundColor: '#111',
           color: 'white',
@@ -73,6 +83,7 @@ export default function RegisterScreen({ navigation }) {
           borderRadius: 8,
         }}
       />
+
       <TextInput
         placeholder="Senha"
         placeholderTextColor="#aaa"
@@ -89,7 +100,7 @@ export default function RegisterScreen({ navigation }) {
       />
 
       {error ? <Text style={{ color: 'red', marginTop: 10 }}>{error}</Text> : null}
-      {success ? <Text style={{ color: colors.neon, marginTop: 10 }}>✅ Conta criada com sucesso!</Text> : null}
+      {success ? <Text style={{ color: 'lime', marginTop: 10 }}>Conta criada com sucesso! Redirecionando...</Text> : null}
 
       <TouchableOpacity
         onPress={handleRegister}
@@ -100,16 +111,17 @@ export default function RegisterScreen({ navigation }) {
           marginTop: 20,
           alignItems: 'center',
         }}
+        disabled={loading}
       >
         {loading ? (
           <ActivityIndicator color="black" />
         ) : (
-          <Text style={{ fontWeight: '700', color: 'black' }}>Cadastrar</Text>
+          <Text style={{ fontWeight: '700', color: 'black' }}>Criar Conta</Text>
         )}
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => navigation.navigate('Login')} style={{ marginTop: 16 }}>
-        <Text style={{ color: colors.neon, textAlign: 'center' }}>Já tenho uma conta</Text>
+        <Text style={{ color: colors.neon, textAlign: 'center' }}>Já tem conta? Entrar</Text>
       </TouchableOpacity>
     </View>
   );
