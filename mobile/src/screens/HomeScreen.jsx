@@ -1,5 +1,14 @@
+// mobile/src/screens/HomeScreen.jsx
 import React, { useEffect, useState } from 'react';
-import { ScrollView, Text, ActivityIndicator, View, TouchableOpacity } from 'react-native';
+import {
+  ScrollView,
+  Text,
+  ActivityIndicator,
+  View,
+  TouchableOpacity,
+} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
 import { api } from '../api';
 import { colors } from '../theme/colors';
 
@@ -7,6 +16,7 @@ export default function HomeScreen() {
   const [status, setStatus] = useState('Carregando...');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const navigation = useNavigation();
 
   const checkAPI = async () => {
     setLoading(true);
@@ -24,6 +34,15 @@ export default function HomeScreen() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem('token');
+    api.defaults.headers.common['Authorization'] = '';
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Login' }],
+    });
   };
 
   useEffect(() => {
@@ -77,6 +96,20 @@ export default function HomeScreen() {
           </>
         )}
       </View>
+
+      {/* ✅ Botão de Logout */}
+      <TouchableOpacity
+        onPress={handleLogout}
+        style={{
+          backgroundColor: 'red',
+          paddingVertical: 12,
+          paddingHorizontal: 24,
+          borderRadius: 8,
+          marginTop: 50,
+        }}
+      >
+        <Text style={{ color: 'white', fontWeight: '700' }}>🚪 Sair</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 }
