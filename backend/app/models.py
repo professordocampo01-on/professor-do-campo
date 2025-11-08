@@ -3,11 +3,13 @@ from sqlmodel import SQLModel, Field, Column
 from datetime import datetime
 from sqlalchemy import JSON, TIMESTAMP, text
 
+
 class Team(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     name: str
     league: Optional[str] = None
     country: Optional[str] = None
+
 
 class Player(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -16,6 +18,7 @@ class Player(SQLModel, table=True):
     position: Optional[str] = None
     nationality: Optional[str] = None
 
+
 class Match(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     date: str
@@ -23,6 +26,7 @@ class Match(SQLModel, table=True):
     away_team_id: Optional[int] = Field(default=None, foreign_key="team.id")
     stadium: Optional[str] = None
     status: Optional[str] = "finished"
+
 
 class Event(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -38,6 +42,7 @@ class Event(SQLModel, table=True):
     tags: Optional[dict] = Field(sa_column=Column(JSON), default=None)
     xg: Optional[float] = None
 
+
 class PlayerStatsPerMatch(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     player_id: int = Field(foreign_key="player.id")
@@ -50,6 +55,7 @@ class PlayerStatsPerMatch(SQLModel, table=True):
     passes: Optional[int] = None
     progressive_passes: Optional[int] = None
 
+
 class Message(SQLModel, table=True):
     __tablename__ = "messages"
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -57,8 +63,16 @@ class Message(SQLModel, table=True):
     sender_id: Optional[int] = Field(default=None)
     sender_name: Optional[str] = Field(default=None)
     content: str
-    metadata: Optional[dict] = Field(sa_column=Column(JSON), default={})
-    created_at: datetime = Field(default_factory=datetime.utcnow, sa_column=Column(TIMESTAMP(timezone=True), server_default=text('now()')))
+    meta_data: Optional[dict] = Field(
+        default={},
+        sa_column=Column(JSON),
+        alias="metadata"
+    )
+    created_at: datetime = Field(
+        default_factory=datetime.utcnow,
+        sa_column=Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    )
+
 
 class SupportTicket(SQLModel, table=True):
     __tablename__ = "support_tickets"
@@ -68,8 +82,16 @@ class SupportTicket(SQLModel, table=True):
     subject: str
     description: str
     status: str = Field(default="open")
-    created_at: datetime = Field(default_factory=datetime.utcnow, sa_column=Column(TIMESTAMP(timezone=True), server_default=text('now()')))
-    metadata: Optional[dict] = Field(sa_column=Column(JSON), default={})
+    created_at: datetime = Field(
+        default_factory=datetime.utcnow,
+        sa_column=Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    )
+    meta_data: Optional[dict] = Field(
+        default={},
+        sa_column=Column(JSON),
+        alias="metadata"
+    )
+
 
 class User(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
