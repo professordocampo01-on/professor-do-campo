@@ -1,41 +1,30 @@
+# backend/app/main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .database import engine
-from sqlmodel import SQLModel
-from .api import routes as routes_module, auth as auth_module, chat as chat_module
-from .utils.ws_manager import manager
-import os
+from .api import auth, me, chat, routes
 
-app = FastAPI(title="Professor Do Campo - Backend", version="0.1")
+app = FastAPI(
+    title="Professor do Campo API",
+    description="Backend principal do aplicativo Professor do Campo",
+    version="1.0.0",
+)
 
-# ✅ Configuração do CORS
+# ✅ Permitir comunicação entre mobile, web e backend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # ⚠️ Libera acesso de qualquer origem (frontend)
+    allow_origins=["*"],  # Em produção, troque por o domínio específico
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ✅ Função para criar tabelas no banco
-def create_db_and_tables():
-    SQLModel.metadata.create_all(engine)
-
-# ✅ Evento de inicialização
-@app.on_event("startup")
-async def on_startup():
-    create_db_and_tables()
-    try:
-        await manager.start_redis_listener()
-    except Exception:
-        pass
-
-# ✅ Rota raiz — health check
+# ✅ Rota de status principal
 @app.get("/")
 def root():
-    return {"message": "Professor do Campo API is running ✅"}
+    return {"message": "🚀 API do Professor do Campo está online!"}
 
-# ✅ Inclui as rotas dos módulos existentes
-app.include_router(routes_module.router)
-app.include_router(auth_module.router)
-app.include_router(chat_module.router)
+# ✅ Registrar rotas da API
+app.include_router(auth.router)
+app.include_router(me.router)
+app.include_router(chat.router)
+app.include_router(routes.router)
